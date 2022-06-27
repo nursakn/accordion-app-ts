@@ -7,11 +7,10 @@
       <h3>
         <slot name="title" />
       </h3>
-      <div v-if="editable" class="flex gap-2">
-        <button @click.stop="onDelete">Delete</button>
-        <button @click.stop="onEdit">Edit</button>
-        <span v-if="isOpen">-</span>
-        <span v-else>+</span>
+      <div class="flex gap-2">
+        <slot name="buttons" />
+        <button v-if="isOpen" @click="toggle">-</button>
+        <button v-else @click="toggle">+</button>
       </div>
     </button>
     <Transition name="fadeHeight">
@@ -27,60 +26,24 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Emit, InjectReactive, Prop } from "vue-property-decorator";
+import { Inject, InjectReactive, Watch } from "vue-property-decorator";
 
 @Component
 export default class AccordionItem extends Vue {
   // eslint-disable-next-line no-unused-vars
-  @InjectReactive() readonly setIndex!: (id: number) => void;
-  @InjectReactive() readonly reactiveIndex!: { currentItem: number };
+  @Inject() readonly setIndex!: (id: symbol) => void;
+  @InjectReactive() readonly toggle!: (id: symbol) => void;
+  @InjectReactive() readonly getOpen!: (id: symbol) => boolean;
+  @InjectReactive() readonly reactive!: { currentItem: symbol };
 
-  @Prop({ default: 0 }) readonly index!: number;
-  @Prop(Boolean) readonly editable: boolean | undefined;
+  index = Symbol();
+  isOpen = false;
 
-  toggle() {
-    this.setIndex(this.index);
-  }
-
-  @Emit()
-  onDelete() {
-    return this.index;
-  }
-  @Emit()
-  onEdit() {
-    return this.index;
-  }
-
-  //computed
-  get isOpen() {
-    return this.reactiveIndex.currentItem === this.index;
+  @Watch("reactive")
+  onReactiveChanged() {
+    this.getOpen(this.index);
   }
 }
-
-// export default {
-//   inject: ["setIndex", "reactiveIndex"],
-//   name: "AccordionItem",
-//   props: {
-//     index: Number,
-//     editable: Boolean,
-//   },
-//   methods: {
-//     toggle() {
-//       this.setIndex(this.index);
-//     },
-//     onDelete() {
-//       this.$emit("delete", this.index);
-//     },
-//     onEdit() {
-//       this.$emit("edit", this.index);
-//     },
-//   },
-//   computed: {
-//     isOpen: function () {
-//       return this.reactiveIndex.currentItem === this.index;
-//     },
-//   },
-// };
 </script>
 
 <style>

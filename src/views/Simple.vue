@@ -1,15 +1,15 @@
 <template>
   <section>
-    <Accordion>
-      <AccordionItem :index="1" :editable="false">
+    <Accordion :independent="true">
+      <AccordionItem>
         <template v-slot:title> Блок 1 </template>
         <template>Описание</template>
       </AccordionItem>
-      <AccordionItem :index="2" :editable="false">
+      <AccordionItem>
         <template v-slot:title> Блок 2 </template>
         <template>Описание</template>
       </AccordionItem>
-      <AccordionItem :index="3" :editable="false">
+      <AccordionItem>
         <template v-slot:title> Блок 3 </template>
         <template>Описание</template>
       </AccordionItem>

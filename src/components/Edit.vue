@@ -21,8 +21,14 @@ import { Prop } from "vue-property-decorator";
 export default class Edit extends Vue {
   @Prop() readonly item!: ItemT;
 
-  title = this.item.title;
-  description = this.item.description;
+  title = "";
+  description = "";
+
+  created() {
+    this.title = this.item.title;
+    this.description = this.item.description;
+  }
+
   submit() {
     this.$emit("edit-submit", {
       id: this.item.id,
@@ -31,27 +37,6 @@ export default class Edit extends Vue {
     });
   }
 }
-// export default {
-//   name: "Edit",
-//   props: {
-//     item: {},
-//   },
-//   data() {
-//     return {
-//       title: this.item.title,
-//       description: this.item.description,
-//     };
-//   },
-//   methods: {
-//     submit() {
-//       this.$emit("edit-submit", {
-//         id: this.item.id,
-//         title: this.title,
-//         description: this.description,
-//       });
-//     },
-//   },
-// };
 </script>
 
 <style></style>

@@ -1,16 +1,13 @@
 <template>
   <section>
     <Accordion>
-      <AccordionItem
-        v-for="(item, index) in itemList"
-        :key="index"
-        :index="item.id"
-        :editable="true"
-        v-on:on-delete="removeItem"
-        v-on:on-edit="openEdit"
-      >
+      <AccordionItem v-for="(item, index) in itemList" :key="index">
         <template v-slot:title>{{ item.title }}</template>
         <template>{{ item.description }}</template>
+        <template v-slot:buttons>
+          <button @click.stop="removeItem(item.id)">Delete</button>
+          <button @click.stop="openEdit(item.id)">Edit</button>
+        </template>
       </AccordionItem>
     </Accordion>
     <form class="pb-3 flex flex-col gap-2" @submit.prevent="addItem()">

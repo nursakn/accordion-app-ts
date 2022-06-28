@@ -1,7 +1,7 @@
 <template>
-  <article class="mb-2">
+  <article>
     <button
-      @click="toggle(index)"
+      @click="toggleOpen"
       class="flex justify-between w-full bg-blue-400 text-left p-2 rounded"
     >
       <h3>
@@ -10,8 +10,8 @@
       </h3>
       <div class="flex gap-2">
         <slot name="buttons" />
-        <button v-if="isOpen" @click="toggle">-</button>
-        <button v-else @click="toggle">+</button>
+        <button v-if="isOpen" @click="toggleOpen">-</button>
+        <button v-else @click="toggleOpen">+</button>
       </div>
     </button>
     <Transition name="fadeHeight">
@@ -30,8 +30,7 @@ import Component from "vue-class-component";
 import { Inject, InjectReactive, Prop, Watch } from "vue-property-decorator";
 
 @Component
-export default class AccordionItem extends Vue {
-  // eslint-disable-next-line no-unused-vars
+export default class AccordionItemV2 extends Vue {
   @Inject() readonly setIndex: (id: symbol) => void;
   @Inject() readonly toggle: (id: symbol) => void;
   @Inject() readonly getOpen: (id: symbol) => boolean;
@@ -40,6 +39,13 @@ export default class AccordionItem extends Vue {
 
   index = Symbol();
   isOpen = false;
+
+  toggleOpen() {
+    if (this.toggle) {
+      this.toggle(this.index);
+    }
+    this.isOpen = !this.isOpen;
+  }
 
   @Watch("reactive", { deep: true, immediate: true })
   onReactiveChanged() {

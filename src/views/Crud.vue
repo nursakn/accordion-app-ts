@@ -33,6 +33,8 @@ import AccordionItem from "../components/AccordionItem.vue";
 import Accordion from "../components/Accordion.vue";
 import Edit from "../components/Edit.vue";
 import { ItemT } from "../types";
+import { Inject } from "vue-property-decorator";
+import { InfrastructureI } from "@/infrastructure";
 
 @Component({
   components: {
@@ -41,7 +43,8 @@ import { ItemT } from "../types";
     Edit,
   },
 })
-class Crud extends Vue {
+export default class Crud extends Vue {
+  @Inject() infra: InfrastructureI;
   itemList: ItemT[] = [];
   title = "";
   description = "";
@@ -54,20 +57,16 @@ class Crud extends Vue {
   };
   addItem() {
     this.clearEditor();
-    if (this.title && this.description) {
-      this.itemList.push({
-        id: Math.floor(Math.random() * 1000000),
-        title: this.title,
-        description: this.description,
-      });
-      this.error = "";
-    } else {
-      this.error = "Fill all fields";
-    }
+    this.infra.qna.createItem({
+      title: this.title,
+      description: this.description,
+    });
+    this.itemList = this.infra.qna.getItems();
   }
   removeItem(index: number) {
     this.clearEditor();
-    this.itemList = this.itemList.filter((item) => index !== item.id);
+    this.infra.qna.deleteItem(index);
+    this.itemList = this.infra.qna.getItems();
   }
   openEdit(index: number) {
     this.isEditing = true;
@@ -81,13 +80,8 @@ class Crud extends Vue {
         };
   }
   submitEdit(object: ItemT) {
-    const id = this.itemList.findIndex((item) => object.id === item.id);
-    console.log("SUBMIT: " + id + JSON.stringify(object));
-    const tempArray = [...this.itemList];
-    if (id !== -1) {
-      tempArray[id] = object;
-    }
-    this.itemList = tempArray;
+    this.infra.qna.updateItem(object);
+    this.itemList = this.infra.qna.getItems();
     this.clearEditor();
   }
   clearEditor() {
@@ -99,8 +93,6 @@ class Crud extends Vue {
     };
   }
 }
-
-export default Crud;
 
 // export default {
 //   components: { Accordion, AccordionItem, Edit },

@@ -13,31 +13,30 @@ type ReactiveT = {
   currentItem: symbol;
 };
 
-type ReactiveArrayT = {
-  currentItem: symbol[];
-};
-
 @Component
 export default class Accordion extends Vue {
   @Prop({ type: Boolean, default: false }) independent!: boolean;
   reactiveIndex: ReactiveT = { currentItem: Symbol() };
-  reactiveArray: ReactiveArrayT = { currentItem: [] };
+  reactiveArray: symbol[] = [];
 
   @Provide() setIndex = (index: symbol) => {
-    if (this.reactive.currentItem === index) {
-      this.reactive.currentItem = Symbol();
+    if (this.reactiveIndex.currentItem === index) {
+      this.reactiveIndex.currentItem = Symbol();
     } else {
-      this.reactive.currentItem = index;
+      this.reactiveIndex.currentItem = index;
     }
   };
-  @ProvideReactive() toggle = (index: symbol) => {
+
+  @Provide() toggle(index: symbol) {
     console.log("TOGGLING: " + this.independent);
-    if (this.independent) {
-      if (this.reactiveArray.currentItem.includes(index)) {
-        this.reactiveArray.currentItem.filter((id) => id !== index);
+    if (this.$props.independent) {
+      if (this.reactiveArray.includes(index)) {
+        this.reactiveArray = this.reactiveArray.filter((id) => id !== index);
+        this.reactive = this.reactiveArray;
       } else {
         console.log("PUSHHING");
-        this.reactiveArray.currentItem.push(index);
+        this.reactiveArray.push(index);
+        this.reactive = this.reactiveArray;
       }
     } else {
       if (this.reactiveIndex.currentItem === index) {
@@ -46,15 +45,19 @@ export default class Accordion extends Vue {
         this.reactiveIndex.currentItem = index;
       }
     }
-  };
-  @ProvideReactive() getOpen = (index: symbol) => {
-    if (this.independent) {
-      return this.reactiveArray.currentItem.includes(index);
+  }
+
+  @Provide() getOpen(index: symbol) {
+    if (this.$props.independent) {
+      return this.reactiveArray.includes(index);
     } else {
-      return this.reactive.currentItem === index;
+      return this.reactiveIndex.currentItem === index;
     }
-  };
-  @ProvideReactive() reactive = this.reactiveIndex;
+  }
+
+  @ProvideReactive() reactive = this.$props.independent
+    ? this.reactiveArray
+    : this.reactiveIndex;
 }
 </script>
 

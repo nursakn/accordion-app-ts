@@ -10,19 +10,17 @@
         </template>
       </AccordionItem>
     </Accordion>
-    <form class="pb-3 flex flex-col gap-2" @submit.prevent="addItem()">
-      <label for="title">
-        title
-        <input id="title" v-model="title" />
-      </label>
-      <label for="description">
-        description
-        <input id="description" v-model="description" />
-      </label>
-      <input type="submit" />
-    </form>
-    <p class="text-red-800 font-bold">{{ error }}</p>
-    <Edit v-if="isEditing" :item="editingItem" v-on:edit-submit="submitEdit" />
+    <button @click="openModal('create')">Create Item</button>
+    <Modal :open="modalOpen" @close="modalOpen = false">
+      <Form
+        :title="'Edit'"
+        v-if="isEditing"
+        :item="editingItem"
+        @submit="submitEdit"
+        edit
+      />
+      <Form v-else :title="'Create'" @submit="addItem" />
+    </Modal>
   </section>
 </template>
 
@@ -31,45 +29,57 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import AccordionItem from "../components/AccordionItem.vue";
 import Accordion from "../components/Accordion.vue";
-import Edit from "../components/Edit.vue";
-import { ItemT } from "../types";
+import Form from "../components/Form.vue";
 import { Inject } from "vue-property-decorator";
 import { InfrastructureI } from "@/infrastructure";
+import { IQnaItem, IQnaItemCreate } from "@/infrastructure/QNAService/types";
+import Modal from "../components/Modal.vue";
 
 @Component({
   components: {
     AccordionItem,
     Accordion,
-    Edit,
+    Form,
+    Modal,
   },
 })
 export default class Crud extends Vue {
   @Inject() infra: InfrastructureI;
-  itemList: ItemT[] = [];
-  title = "";
-  description = "";
-  error = "";
+  itemList: IQnaItem[] = [];
   isEditing = false;
-  editingItem: ItemT = {
+  editingItem: IQnaItem = {
     id: 0,
     title: "",
     description: "",
   };
-  addItem() {
-    this.clearEditor();
-    this.infra.qna.createItem({
-      title: this.title,
-      description: this.description,
-    });
-    this.itemList = this.infra.qna.getItems();
+  modalOpen = false;
+
+  mounted() {
+    this.fetchItems();
   }
+
+  async fetchItems() {
+    this.itemList = await this.infra.qna.fetchItems();
+    console.log("FETCHED");
+  }
+
+  openModal(type: "edit" | "create") {
+    this.modalOpen = true;
+    this.isEditing = type === "edit" ? true : false;
+  }
+
+  addItem(item: IQnaItemCreate) {
+    this.clearEditor();
+    this.infra.qna.createItem(item).then(() => this.fetchItems());
+    this.modalOpen = false;
+  }
+
   removeItem(index: number) {
     this.clearEditor();
-    this.infra.qna.deleteItem(index);
-    this.itemList = this.infra.qna.getItems();
+    this.infra.qna.deleteItem(index).then(() => this.fetchItems());
   }
+
   openEdit(index: number) {
-    this.isEditing = true;
     const item = this.itemList.find((item) => index === item.id);
     this.editingItem = item
       ? item
@@ -78,12 +88,15 @@ export default class Crud extends Vue {
           title: "",
           description: "",
         };
+    this.openModal("edit");
   }
-  submitEdit(object: ItemT) {
-    this.infra.qna.updateItem(object);
-    this.itemList = this.infra.qna.getItems();
+
+  submitEdit(object: IQnaItem) {
+    this.infra.qna.updateItem(object).then(() => this.fetchItems());
     this.clearEditor();
+    this.modalOpen = false;
   }
+
   clearEditor() {
     this.isEditing = false;
     this.editingItem = {
@@ -93,58 +106,6 @@ export default class Crud extends Vue {
     };
   }
 }
-
-// export default {
-//   components: { Accordion, AccordionItem, Edit },
-//   name: "Crud",
-//   data() {
-//     return {
-//       itemList: [],
-//       title: "",
-//       description: "",
-//       error: "",
-//       isEditing: false,
-//       editingItem: {},
-//     };
-//   },
-//   methods: {
-//     addItem() {
-//       this.clearEditor();
-//       if (this.title && this.description) {
-//         this.itemList.push({
-//           id: Math.floor(Math.random() * 1000000),
-//           title: this.title,
-//           description: this.description,
-//         });
-//         this.error = "";
-//       } else {
-//         this.error = "Fill all fields";
-//       }
-//     },
-//     removeItem(index) {
-//       this.clearEditor();
-//       this.itemList = this.itemList.filter((item) => index !== item.id);
-//     },
-//     openEdit(index) {
-//       this.isEditing = true;
-//       this.editingItem = this.itemList.find((item) => index === item.id);
-//     },
-//     submitEdit(object) {
-//       const id = this.itemList.findIndex((item) => object.id === item.id);
-//       console.log("SUBMIT: " + id + JSON.stringify(object));
-//       const tempArray = [...this.itemList];
-//       if (id !== -1) {
-//         tempArray[id] = object;
-//       }
-//       this.itemList = tempArray;
-//       this.clearEditor();
-//     },
-//     clearEditor() {
-//       this.isEditing = false;
-//       this.editingItem = {};
-//     },
-//   },
-// };
 </script>
 
 <style></style>

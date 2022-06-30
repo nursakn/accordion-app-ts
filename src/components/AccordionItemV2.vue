@@ -50,7 +50,6 @@ export default class AccordionItemV2 extends Vue {
   @Watch("reactive", { deep: true, immediate: true })
   onReactiveChanged() {
     this.isOpen = this.getOpen(this.index);
-    console.log("CHAGNES: " + this.isOpen);
   }
 }
 </script>

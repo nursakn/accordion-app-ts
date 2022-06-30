@@ -1,14 +1,16 @@
 import qnaService from "./QNAService/service";
-import { qnaServiceI } from "./QNAService/types";
-
+import { IQnaService } from "./QNAService/types";
+import MyLocalStorage from "@/services/localStorageService";
 export interface InfrastructureI {
-  qna: qnaServiceI;
+  qna: IQnaService;
 }
-
-const qna = new qnaService();
-
-const infrastructure = {
-  qna: qna,
+const createInfrastrucure = (storage: Storage) => {
+  const myStorage = new MyLocalStorage(storage);
+  const qna = new qnaService(myStorage);
+  const infrastructure = {
+    qna: qna,
+  };
+  return infrastructure;
 };
 
-export default infrastructure;
+export default createInfrastrucure;

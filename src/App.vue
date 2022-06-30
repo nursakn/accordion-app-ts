@@ -12,11 +12,12 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Provide } from "vue-property-decorator";
-import infrastructure from "./infrastructure";
+import createInfrastructure from "./infrastructure";
 
 @Component
 export default class App extends Vue {
-  @Provide() infra = infrastructure;
+  Infrastructure = createInfrastructure(window.localStorage);
+  @Provide() infra = this.Infrastructure;
 }
 </script>
 

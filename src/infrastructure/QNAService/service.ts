@@ -1,28 +1,38 @@
-import { QnaI, qnaServiceI, QnaWithoutIdI } from "./types";
+import ILocalStorage from "@/services/localStorageService";
+import { IQnaItem, IQnaItemCreate, IQnaService } from "./types";
+export default class qnaService implements IQnaService {
+  storage: ILocalStorage;
 
-export default class qnaService implements qnaServiceI {
-  items: QnaI[] = [];
+  constructor(storage: ILocalStorage) {
+    this.storage = storage;
+  }
 
-  createItem(qna: QnaWithoutIdI) {
-    this.items.push({
+  async createItem(qna: IQnaItemCreate) {
+    const items = await this.storage.getQnaItems();
+    items.push({
       id: Math.floor(Math.random() * 1000000),
       title: qna.title,
       description: qna.description,
     });
+    this.storage.setStorage(items);
   }
 
-  getItems(): QnaI[] {
-    return this.items;
+  async fetchItems() {
+    const items = await this.storage.getQnaItems();
+    return items;
   }
 
-  updateItem(qna: QnaI) {
-    const index = this.items.findIndex((item) => qna.id === item.id);
+  async updateItem(qna: IQnaItem) {
+    const items = await this.storage.getQnaItems();
+    const index = items.findIndex((item) => qna.id === item.id);
     if (index !== -1) {
-      this.items[index] = qna;
+      items[index] = qna;
     }
+    this.storage.setStorage(items);
   }
 
-  deleteItem(id: number) {
-    this.items = this.items.filter((item) => item.id !== id);
+  async deleteItem(id: number) {
+    const items = await this.storage.getQnaItems();
+    this.storage.setStorage(items.filter((item) => item.id !== id));
   }
 }

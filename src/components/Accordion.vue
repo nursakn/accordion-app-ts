@@ -28,13 +28,11 @@ export default class Accordion extends Vue {
   };
 
   @Provide() toggle(index: symbol) {
-    console.log("TOGGLING: " + this.independent);
     if (this.$props.independent) {
       if (this.reactiveArray.includes(index)) {
         this.reactiveArray = this.reactiveArray.filter((id) => id !== index);
         this.reactive = this.reactiveArray;
       } else {
-        console.log("PUSHHING");
         this.reactiveArray.push(index);
         this.reactive = this.reactiveArray;
       }

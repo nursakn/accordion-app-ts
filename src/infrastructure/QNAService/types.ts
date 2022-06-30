@@ -1,16 +1,17 @@
-export interface QnaWithoutIdI {
+import ILocalStorage from "@/services/localStorageService";
+
+export interface IQnaItem {
+  id: number;
   title: string;
   description: string;
 }
 
-export interface QnaI extends QnaWithoutIdI {
-  id: number;
-}
+export type IQnaItemCreate = Omit<IQnaItem, "id">;
 
-export interface qnaServiceI {
-  items: QnaI[];
-  createItem(qna: QnaWithoutIdI): void;
-  getItems(): QnaI[];
-  updateItem(qna: QnaI): void;
-  deleteItem(id: number): void;
+export interface IQnaService {
+  storage: ILocalStorage;
+  createItem(qna: IQnaItemCreate): Promise<void>;
+  fetchItems(): Promise<IQnaItem[]>;
+  updateItem(qna: IQnaItem): Promise<void>;
+  deleteItem(id: number): Promise<void>;
 }

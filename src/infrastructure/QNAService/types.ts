@@ -1,4 +1,4 @@
-import ILocalStorage from "@/services/localStorageService";
+import ILocalStorage from "@/services/storageService";
 
 export interface IQnaItem {
   id: number;
@@ -6,12 +6,17 @@ export interface IQnaItem {
   description: string;
 }
 
-export type IQnaItemCreate = Omit<IQnaItem, "id">;
-
 export interface IQnaService {
-  storage: ILocalStorage;
-  createItem(qna: IQnaItemCreate): Promise<void>;
+  repository: IQnaRepository;
+  createItem(qna: IQnaItem): Promise<void>;
   fetchItems(): Promise<IQnaItem[]>;
   updateItem(qna: IQnaItem): Promise<void>;
   deleteItem(id: number): Promise<void>;
+}
+
+export interface IQnaRepository {
+  storage: ILocalStorage;
+  set(items: IQnaItem[]): void;
+  get(): Promise<IQnaItem[]>;
+  clear(): void;
 }

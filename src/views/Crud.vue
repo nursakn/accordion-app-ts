@@ -1,5 +1,9 @@
 <template>
   <section>
+    <button @click="fetchItems">
+      <p>Refresh</p>
+    </button>
+    <p class="text-center" v-if="loading">Loading...</p>
     <Accordion>
       <AccordionItem v-for="(item, index) in itemList" :key="index">
         <template v-slot:title>{{ item.title }}</template>
@@ -10,16 +14,9 @@
         </template>
       </AccordionItem>
     </Accordion>
-    <button @click="openModal('create')">Create Item</button>
-    <Modal :open="modalOpen" @close="modalOpen = false">
-      <Form
-        :title="'Edit'"
-        v-if="isEditing"
-        :item="editingItem"
-        @submit="submitEdit"
-        edit
-      />
-      <Form v-else :title="'Create'" @submit="addItem" />
+    <button @click="openModal('Create')">Create Item</button>
+    <Modal :open="isModalOpen" @close="isModalOpen = false">
+      <Form :title="modalTitle" :item="editingItem" @submit="onFormSubmit" />
     </Modal>
   </section>
 </template>
@@ -32,7 +29,7 @@ import Accordion from "../components/Accordion.vue";
 import Form from "../components/Form.vue";
 import { Inject } from "vue-property-decorator";
 import { InfrastructureI } from "@/infrastructure";
-import { IQnaItem, IQnaItemCreate } from "@/infrastructure/QNAService/types";
+import { IQnaItem } from "@/infrastructure/QNAService/types";
 import Modal from "../components/Modal.vue";
 
 @Component({
@@ -46,37 +43,36 @@ import Modal from "../components/Modal.vue";
 export default class Crud extends Vue {
   @Inject() infra: InfrastructureI;
   itemList: IQnaItem[] = [];
-  isEditing = false;
   editingItem: IQnaItem = {
     id: 0,
     title: "",
     description: "",
   };
-  modalOpen = false;
+  isModalOpen = false;
+  modalTitle = "";
+  loading = false;
 
   mounted() {
     this.fetchItems();
   }
 
   async fetchItems() {
+    this.loading = true;
+    this.itemList = [];
     this.itemList = await this.infra.qna.fetchItems();
+    this.loading = false;
     console.log("FETCHED");
   }
 
-  openModal(type: "edit" | "create") {
-    this.modalOpen = true;
-    this.isEditing = type === "edit" ? true : false;
-  }
-
-  addItem(item: IQnaItemCreate) {
-    this.clearEditor();
-    this.infra.qna.createItem(item).then(() => this.fetchItems());
-    this.modalOpen = false;
+  openModal(type: "Edit" | "Create") {
+    this.isModalOpen = true;
+    this.modalTitle = type;
   }
 
   removeItem(index: number) {
     this.clearEditor();
-    this.infra.qna.deleteItem(index).then(() => this.fetchItems());
+    this.infra.qna.deleteItem(index);
+    this.itemList = this.itemList.filter((item) => item.id !== index);
   }
 
   openEdit(index: number) {
@@ -88,17 +84,33 @@ export default class Crud extends Vue {
           title: "",
           description: "",
         };
-    this.openModal("edit");
+    this.openModal("Edit");
   }
 
-  submitEdit(object: IQnaItem) {
-    this.infra.qna.updateItem(object).then(() => this.fetchItems());
+  addItem(item: IQnaItem) {
     this.clearEditor();
-    this.modalOpen = false;
+    this.infra.qna.createItem(item);
+    this.itemList.push(item);
+    this.isModalOpen = false;
+  }
+
+  editItem(item: IQnaItem) {
+    this.infra.qna.updateItem(item);
+    const index = this.itemList.findIndex((el) => el.id === item.id);
+    this.itemList[index] = item;
+    this.clearEditor();
+    this.isModalOpen = false;
+  }
+
+  onFormSubmit(item: IQnaItem) {
+    if (item.id === 0) {
+      this.addItem(item);
+    } else {
+      this.editItem(item);
+    }
   }
 
   clearEditor() {
-    this.isEditing = false;
     this.editingItem = {
       id: 0,
       title: "",

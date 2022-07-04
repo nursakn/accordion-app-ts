@@ -1,34 +1,32 @@
-import { IQnaItem } from "@/infrastructure/QNAService/types";
-
-export default interface ILocalStorage {
+export default interface IStorageService {
   localStorage: Storage;
   qnaItems: string;
-  setStorage(items: IQnaItem[]): Promise<void>;
-  getQnaItems(): Promise<IQnaItem[]>;
+  setStorage(items: []): Promise<void>;
+  getStorage<T>(): Promise<T[]>;
   clearStorage(): Promise<void>;
 }
 
-export default class MyLocalStorage implements ILocalStorage {
-  constructor(storage: Storage) {
+export default class StorageService implements IStorageService {
+  constructor(storage: Storage, key: string) {
     this.localStorage = storage;
-    this.qnaItems = "QNAItems";
+    this.qnaItems = key;
   }
 
-  setStorage(items: IQnaItem[]) {
+  setStorage<T>(items: T[]) {
     return new Promise(() => {
       setTimeout(() => {
         this.localStorage.setItem(this.qnaItems, JSON.stringify(items));
-      }, 1000);
+      }, 250);
     });
   }
 
-  getQnaItems(): Promise<IQnaItem[]> {
+  getStorage<T>(): Promise<T[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const items = this.localStorage.getItem(this.qnaItems);
         console.log(items);
         resolve(items ? JSON.parse(items) : []);
-      }, 1000);
+      }, 250);
     });
   }
 
@@ -36,7 +34,7 @@ export default class MyLocalStorage implements ILocalStorage {
     return new Promise(() => {
       setTimeout(() => {
         this.localStorage.clear();
-      }, 1000);
+      }, 250);
     });
   }
 }

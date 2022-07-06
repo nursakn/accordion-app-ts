@@ -1,11 +1,10 @@
 import Vue, { PluginObject, VueConstructor } from "vue";
-import Confirm from "@/components/Confirm.vue";
+import Confirm from "@/components/confirm/Confirm.vue";
+import confirmService from "@/components/confirm/confirm-service";
 
 export const confirmPlugin: PluginObject<any> = {
   install: function (Vue: VueConstructor<Vue>): void {
     Vue.component("confirm-modal", Confirm);
-    Vue.prototype.$confirm = function () {
-      console.log("HELLO");
-    };
+    Vue.prototype.$confirm = confirmService.confirm.bind(confirmService);
   },
 };

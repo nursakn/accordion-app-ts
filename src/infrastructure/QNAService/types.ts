@@ -15,7 +15,7 @@ export interface IQnaService {
 }
 
 export interface IQnaRepository {
-  storage: ILocalStorage;
+  storageService: ILocalStorage;
   set(items: IQnaItem[]): void;
   get(): Promise<IQnaItem[]>;
   clear(): void;

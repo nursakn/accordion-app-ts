@@ -2,21 +2,21 @@ import StorageService from "@/services/storageService";
 import { IQnaItem } from "./types";
 
 export default class QnaRepository {
-  storage: StorageService;
+  storageService: StorageService;
 
-  constructor(storage: StorageService) {
-    this.storage = storage;
+  constructor(storageService: StorageService) {
+    this.storageService = storageService;
   }
 
   set(items: IQnaItem[]) {
-    this.storage.setStorage(items);
+    this.storageService.setData(items);
   }
 
   get() {
-    return this.storage.getStorage<IQnaItem>();
+    return this.storageService.getData<IQnaItem>();
   }
 
   clear() {
-    this.storage.clearStorage();
+    this.storageService.clearStorage();
   }
 }

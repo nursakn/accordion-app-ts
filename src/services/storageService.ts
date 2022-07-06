@@ -1,29 +1,29 @@
 export default interface IStorageService {
   localStorage: Storage;
-  qnaItems: string;
-  setStorage(items: []): Promise<void>;
-  getStorage<T>(): Promise<T[]>;
+  key: string;
+  setData(items: []): Promise<void>;
+  getData<T>(): Promise<T[]>;
   clearStorage(): Promise<void>;
 }
 
 export default class StorageService implements IStorageService {
   constructor(storage: Storage, key: string) {
     this.localStorage = storage;
-    this.qnaItems = key;
+    this.key = key;
   }
 
-  setStorage<T>(items: T[]) {
+  setData<T>(items: T[]) {
     return new Promise(() => {
       setTimeout(() => {
-        this.localStorage.setItem(this.qnaItems, JSON.stringify(items));
+        this.localStorage.setItem(this.key, JSON.stringify(items));
       }, 250);
     });
   }
 
-  getStorage<T>(): Promise<T[]> {
+  getData<T>(): Promise<T[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const items = this.localStorage.getItem(this.qnaItems);
+        const items = this.localStorage.getItem(this.key);
         console.log(items);
         resolve(items ? JSON.parse(items) : []);
       }, 250);

@@ -13,6 +13,7 @@
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "useDefineForClassFields": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [

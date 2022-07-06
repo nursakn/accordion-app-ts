@@ -5,6 +5,7 @@
       <router-link to="/Crud">Crud</router-link>
     </nav>
     <router-view />
+    <confirm-modal :open="isConfirmOpen" />
   </div>
 </template>
 
@@ -17,7 +18,16 @@ import createInfrastructure from "./infrastructure";
 @Component
 export default class App extends Vue {
   Infrastructure = createInfrastructure(window.localStorage);
+  isConfirmOpen = true;
   @Provide() infra = this.Infrastructure;
+  @Provide() openConfirm = () => {
+    this.isConfirmOpen = true;
+  };
+  created() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.$confirm();
+  }
 }
 </script>
 

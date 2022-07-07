@@ -18,6 +18,7 @@
     <Modal :open="isModalOpen" @close="isModalOpen = false">
       <Form :title="modalTitle" :item="editingItem" @submit="onFormSubmit" />
     </Modal>
+    <TnPagination></TnPagination>
   </section>
 </template>
 
@@ -25,6 +26,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import AccordionItem from "../components/AccordionItem.vue";
+import TnPagination from "@/components/pagination/tn-pagination.vue";
 import Accordion from "../components/Accordion.vue";
 import Form from "../components/Form.vue";
 import { Inject } from "vue-property-decorator";
@@ -38,6 +40,7 @@ import Modal from "../components/Modal.vue";
     Accordion,
     Form,
     Modal,
+    TnPagination,
   },
 })
 export default class Crud extends Vue {

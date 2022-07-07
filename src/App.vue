@@ -23,15 +23,6 @@ export default class App extends Vue {
   @Provide() openConfirm = () => {
     this.isConfirmOpen = true;
   };
-  async mounted() {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    if (!(await this.$confirm("Хотите?"))) {
-      console.log("CONFIRM:False");
-      return;
-    }
-    console.log("CONFIRM:TRUE");
-  }
 }
 </script>
 

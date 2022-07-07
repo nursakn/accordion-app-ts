@@ -3,41 +3,36 @@ export interface IConfirmOptions {
   discard?: string;
 }
 
-export interface IConfirmOptionsExternal extends IConfirmOptions {
+export interface IConfirmOptionsExtended extends IConfirmOptions {
   msg: string;
   resolve: (value: boolean | PromiseLike<boolean>) => void;
 }
 
-type ConfirmEvents = "open" | "close";
+export type ICallBack = (options: IConfirmOptionsExtended) => void;
 
-type CallbackFn = (options: IConfirmOptionsExternal) => void;
+export type ConfirmEvents = "open" | "close";
 
-const callbacks: Record<ConfirmEvents, CallbackFn[]> = {
+const callbacks: Record<ConfirmEvents, ICallBack[]> = {
   open: [],
   close: [],
 };
 
 const confirmService = {
-  off(name: ConfirmEvents, fn: CallbackFn) {
-    callbacks.open = callbacks.open.filter((el) => {
-      return fn !== el;
-    });
+  on(name: ConfirmEvents, callback: ICallBack) {
+    callbacks[name].push(callback);
   },
 
-  on(name: ConfirmEvents, fn: CallbackFn) {
-    callbacks.open.push(fn);
+  off(name: ConfirmEvents, callback: ICallBack) {
+    callbacks[name] = callbacks[name].filter((fn) => fn === callback);
   },
 
-  emit(name: ConfirmEvents, options: IConfirmOptionsExternal) {
-    callbacks.open.forEach((fn) => {
-      fn(options);
-    });
+  emit(name: ConfirmEvents, options: IConfirmOptionsExtended) {
+    callbacks[name].forEach((fn) => fn(options));
   },
 
   confirm(msg: ConfirmEvents, options?: IConfirmOptions): Promise<boolean> {
-    console.log("Open Confirm");
     return new Promise((resolve) => {
-      this.emit("open", { ...options, resolve, msg });
+      this.emit("open", { ...options, msg, resolve });
     });
   },
 };

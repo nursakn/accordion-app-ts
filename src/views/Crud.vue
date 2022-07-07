@@ -69,7 +69,16 @@ export default class Crud extends Vue {
     this.modalTitle = type;
   }
 
-  removeItem(index: number) {
+  async removeItem(index: number) {
+    if (
+      !(await this.$confirm(
+        `Delete item "${
+          this.itemList.find((item) => item.id === index)?.title
+        }"?`
+      ))
+    ) {
+      return;
+    }
     this.clearEditor();
     this.infra.qna.deleteItem(index);
     this.itemList = this.itemList.filter((item) => item.id !== index);

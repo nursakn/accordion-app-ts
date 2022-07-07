@@ -1,18 +1,30 @@
 <template>
   <Modal :open="isOpen">
-    <div class="bg-white flex flex-col">Hello World</div>
-    <button @click="onDiscard">cancel</button>
-    <button @click="onSubmit">ok</button>
+    <div class="bg-white flex flex-col text-center mb-4">
+      {{ title ? title : "Confirm?" }}
+    </div>
+    <div class="flex justify-center gap-2">
+      <button
+        class="rounded h-8 w-20 bg-red-600 hover:bg-red-700 transition"
+        @click="onSubmit"
+      >
+        <p class="a text-white">{{ ok ? ok : "ok" }}</p>
+      </button>
+      <button
+        class="rounded h-8 w-20 bg-gray-100 hover:bg-gray-200 transition"
+        @click="onDiscard"
+      >
+        {{ discard ? discard : "cancel" }}
+      </button>
+    </div>
   </Modal>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-// import { Prop } from "vue-property-decorator";
+import confirmService, { IConfirmOptionsExtended } from "./confirm-service";
 import Modal from "../Modal.vue";
-
-import confirmService from "./confirm-service";
 
 @Component({
   components: {
@@ -20,15 +32,14 @@ import confirmService from "./confirm-service";
   },
 })
 export default class Confirm extends Vue {
-  // @Prop({ type: Boolean, default: false }) open: boolean;
-
   isOpen = false;
+  title = "";
+  ok = "";
+  discard = "";
 
-  msg = "";
-  okButtonText = "";
-  discardButtonText = "";
-
-  resolveFn = (v: boolean) => undefined;
+  resolveFn = (value: boolean | PromiseLike<boolean>) => {
+    return;
+  };
 
   onDiscard() {
     this.resolveFn(false);
@@ -36,25 +47,24 @@ export default class Confirm extends Vue {
   }
 
   onSubmit() {
-    //
     this.resolveFn(true);
     this.isOpen = false;
   }
 
-  onOpenCallback(options: any) {
-    console.log("onOpenCallback", options);
-    // setup options
+  onOpenCallback(options: IConfirmOptionsExtended) {
     this.isOpen = true;
-
+    this.title = options.msg;
+    if (options.ok) {
+      this.ok = options.ok;
+    }
+    if (options.discard) {
+      this.discard = options.discard;
+    }
     this.resolveFn = options.resolve;
   }
 
-  created() {
+  mounted() {
     confirmService.on("open", this.onOpenCallback);
-  }
-
-  beforeUnmount() {
-    confirmService.off("open", this.onOpenCallback);
   }
 }
 </script>

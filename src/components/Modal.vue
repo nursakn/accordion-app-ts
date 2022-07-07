@@ -4,7 +4,7 @@
     class="absolute top-0 right-0 bottom-0 left-0 bg-transparent-black flex justify-center items-center"
     @click.self="close"
   >
-    <div class="w-6/12 bg-white rounded p-5">
+    <div class="max-w-6/12 bg-white rounded p-5">
       <slot />
     </div>
   </div>

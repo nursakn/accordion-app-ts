@@ -18,21 +18,22 @@
     <Modal :open="isModalOpen" @close="isModalOpen = false">
       <Form :title="modalTitle" :item="editingItem" @submit="onFormSubmit" />
     </Modal>
-    <TnPagination></TnPagination>
+    <ItemList />
   </section>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import AccordionItem from "../components/AccordionItem.vue";
+import AccordionItem from "@/components/AccordionItem.vue";
 import TnPagination from "@/components/pagination/tn-pagination.vue";
-import Accordion from "../components/Accordion.vue";
-import Form from "../components/Form.vue";
+import Accordion from "@/components/Accordion.vue";
+import Form from "@/components/Form.vue";
 import { Inject } from "vue-property-decorator";
 import { InfrastructureI } from "@/infrastructure";
 import { IQnaItem } from "@/infrastructure/QNAService/types";
-import Modal from "../components/Modal.vue";
+import Modal from "@/components/Modal.vue";
+import ItemList from "../components/ItemList.vue";
 
 @Component({
   components: {
@@ -41,6 +42,7 @@ import Modal from "../components/Modal.vue";
     Form,
     Modal,
     TnPagination,
+    ItemList,
   },
 })
 export default class Crud extends Vue {

@@ -1,6 +1,19 @@
 <template>
   <div class="tn-pagination">
-    <div class="tn-pagination__inner">
+    <!-- Pagination if pages are enough to show them fully - just buttons -->
+    <div v-if="isContentFull" class="tn-pagination__inner">
+      <button
+        v-for="item in pagesCount"
+        :key="item"
+        class="tn-pagination__button"
+        :class="{ 'tn-pagination__button_active': item === value }"
+        @click="goToPage(item)"
+      >
+        {{ item }}
+      </button>
+    </div>
+    <!-- Pagination if pages are not enough to show them fully - arrows and dividers -->
+    <div v-else class="tn-pagination__inner">
       <button
         class="tn-pagination__arrow tn-pagination__arrow_left"
         :class="{ 'tn-pagination__arrow_disabled': isFirstPage }"
@@ -11,35 +24,35 @@
       <button
         v-if="!isFirstPage"
         class="tn-pagination__button"
-        @click="onClick(0)"
+        @click="goToPage(1)"
       >
         1
       </button>
       <div v-if="isLeftDividerShown" class="tn-pagination__divider" />
       <button
         v-for="item in prevItems"
-        :key="Math.random() + item"
+        :key="`pgb-prev-${item}`"
         class="tn-pagination__button"
-        @click="onClick(value + item - 2)"
+        @click="goToPage(value + item - 2)"
       >
-        {{ value + item - 1 }}
+        {{ value + item - 2 }}
       </button>
       <div class="tn-pagination__button tn-pagination__button_active">
-        {{ value + 1 }}
+        {{ value }}
       </div>
       <button
         v-for="item in nextItems"
-        :key="Math.random() + item"
+        :key="`pgb-next-${item}`"
         class="tn-pagination__button"
-        @click="onClick(item + value + 1)"
+        @click="goToPage(value + item)"
       >
-        {{ value + item + 2 }}
+        {{ value + item }}
       </button>
       <div v-if="isRightDividerShown" class="tn-pagination__divider" />
       <button
         v-if="!isLastPage"
         class="tn-pagination__button"
-        @click="onClick(pagesCount - 1)"
+        @click="goToPage(pagesCount)"
       >
         {{ pagesCount }}
       </button>
@@ -57,6 +70,8 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import IconArrow from "./icon-arrow.vue";
+
+const MIN_WIDTH_DESKTOP = 768;
 
 @Component({
   components: {
@@ -78,30 +93,32 @@ export default class TnPagination extends Vue {
     window.addEventListener("resize", this.onResize);
   }
 
+  beforeDestroy() {
+    window.removeEventListener("resize", this.onResize);
+  }
+
   onResize() {
-    console.log(window.innerWidth);
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > MIN_WIDTH_DESKTOP) {
       this.isDesktop = true;
       return;
     }
     this.isDesktop = false;
   }
 
-  onClick(value: number) {
-    console.log(value);
-    this.$emit("change", value);
+  goToPage(value: number) {
+    this.$emit("input", value);
   }
 
   onArrowClick(value: number) {
-    this.$emit("change", this.value + value);
+    this.$emit("input", this.value + value);
   }
 
   get prevItems(): number[] {
-    if (this.value <= 1) {
+    if (this.value <= 2) {
       return [];
     }
     if (this.isDesktop) {
-      if (this.value <= 2) {
+      if (this.value <= 3) {
         return [1];
       }
       return [0, 1];
@@ -110,38 +127,60 @@ export default class TnPagination extends Vue {
   }
 
   get nextItems(): number[] {
-    if (this.value >= this.pagesCount - 2) {
+    if (this.value >= this.pagesCount - 1) {
       return [];
     }
     if (this.isDesktop) {
-      if (this.value >= this.pagesCount - 3) {
-        return [0];
+      if (this.value >= this.pagesCount - 2) {
+        return [1];
       }
-      return [0, 1];
+      return [1, 2];
     }
-    return [0];
+    return [1];
   }
 
   get isFirstPage() {
-    return this.value === 0;
+    return this.value === 1;
   }
 
   get isLastPage() {
-    return this.value + 1 === this.pagesCount;
+    return this.value === this.pagesCount;
   }
 
-  get isLeftDividerShown() {
+  get isLeftDividerShown(): boolean {
     if (this.isDesktop) {
-      return this.value > 3;
+      if (this.pagesCount <= 5) {
+        return false;
+      }
+      return this.value > 4;
     }
-    return this.value > 2;
+    if (this.pagesCount <= 3) {
+      return false;
+    }
+    return this.value > 3;
   }
 
-  get isRightDividerShown() {
+  get isRightDividerShown(): boolean {
     if (this.isDesktop) {
-      return this.value < this.pagesCount - 4;
+      if (this.pagesCount <= 5) {
+        return false;
+      }
+      return this.value < this.pagesCount - 3;
     }
-    return this.value < this.pagesCount - 3;
+    if (this.pagesCount <= 3) {
+      return false;
+    }
+    return this.value < this.pagesCount - 2;
+  }
+
+  get isContentFull(): boolean {
+    if (this.isDesktop && this.pagesCount <= 5) {
+      return true;
+    }
+    if (this.pagesCount <= 3) {
+      return true;
+    }
+    return false;
   }
 }
 </script>
@@ -163,7 +202,7 @@ export default class TnPagination extends Vue {
   display: flex;
   align-items: center;
   width: 100%;
-  justify-content: space-between;
+  justify-content: center;
   gap: 5px;
 }
 

@@ -12,9 +12,10 @@ const routes: Array<RouteConfig> = [
     component: Simple,
   },
   {
-    path: "/crud",
+    path: "/crud?page=:page?",
     name: "crud",
     component: Crud,
+    alias: "/crud",
   },
 ];
 

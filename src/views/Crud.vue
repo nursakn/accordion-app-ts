@@ -18,7 +18,7 @@
     <Modal :open="isModalOpen" @close="isModalOpen = false">
       <Form :title="modalTitle" :item="editingItem" @submit="onFormSubmit" />
     </Modal>
-    <ItemList />
+    <ItemList url="/crud" />
   </section>
 </template>
 

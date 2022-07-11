@@ -1,5 +1,11 @@
 <template>
   <div>
+    <select v-model="currentLimit">
+      <option :value="5">5</option>
+      <option :value="10">10</option>
+      <option :value="20">20</option>
+      <option :value="50">50</option>
+    </select>
     <div
       class="p-2 rounded flex bg-green-400 justify-between mb-2"
       v-for="(item, index) in shownItems"
@@ -12,7 +18,8 @@
       :value="currentPage"
       :limit="currentLimit"
       :total="items.length"
-      @change="onChange"
+      :key="currentLimit"
+      @input="onPageChange"
     />
   </div>
 </template>
@@ -22,6 +29,8 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import { items as itemsArray, Item } from "@/items";
 import TnPagination from "./pagination/tn-pagination.vue";
+import routingService from "@/services/routingService";
+import { Prop, Watch } from "vue-property-decorator";
 
 @Component({
   components: {
@@ -29,18 +38,38 @@ import TnPagination from "./pagination/tn-pagination.vue";
   },
 })
 export default class ItemList extends Vue {
+  @Prop({ type: String }) url: string | undefined;
   items: Item[] = itemsArray;
-  currentPage = 0;
-  currentLimit = 10;
+  currentPage = 1;
+  currentLimit = 5;
 
-  onChange(value: number) {
-    console.log("onChange: ", value);
+  onPageChange(value: number) {
+    if (this.url) {
+      if (value === 1) {
+        this.$router.replace({
+          path: this.url,
+        });
+        return;
+      }
+      routingService.changeRouteParam(this, {
+        page: value.toString(),
+      });
+      return;
+    }
     this.currentPage = value;
   }
 
+  @Watch("$route.params.page", { deep: true })
+  onRoutePageChange(value: string) {
+    if (value) {
+      this.currentPage = +value;
+      return;
+    }
+    this.currentPage = 1;
+  }
+
   get shownItems() {
-    console.log("CHANGED SHOWN");
-    const startingIndex = this.currentPage * this.currentLimit;
+    const startingIndex = (this.currentPage - 1) * this.currentLimit;
     return this.items.slice(startingIndex, startingIndex + this.currentLimit);
   }
 }

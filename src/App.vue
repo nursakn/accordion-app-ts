@@ -2,7 +2,8 @@
   <div id="app" class="p-4">
     <nav>
       <router-link to="/">Home</router-link> |
-      <router-link to="/crud">Crud</router-link>
+      <router-link to="/crud">Crud</router-link> |
+      <router-link to="/bottom">Bottom sheet</router-link>
     </nav>
     <router-view />
     <confirm-modal :open="isConfirmOpen" />

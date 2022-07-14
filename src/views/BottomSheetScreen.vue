@@ -4,14 +4,34 @@
     <br />
     <button @click="openBottomSheet">Open</button> <br />
     <button @click="closeBottomSheet">Close</button>
-    <BottomSheet auto-height ref="bottomSheet" :snap-points="snapPoints">
-      <p>AA</p>
-      <br />
-      <p>AA</p>
-      <br />
-      <p>AA</p>
-      <br />
-      <p>AA</p>
+    <BottomSheet ref="bottomSheet" :snap-points="snapPoints">
+      <template v-slot:header>
+        <div>HEADER</div>
+      </template>
+      <template v-slot:footer>
+        <div>FOOTER</div>
+      </template>
+      <template>
+        <div>
+          <button @click="contentExpanded = !contentExpanded">Open</button>
+          <div v-if="contentExpanded">
+            <p>BB</p>
+            <br />
+            <p>BB</p>
+            <br />
+            <p>BB</p>
+            <br />
+            <p>BB</p>
+          </div>
+          <p>AA</p>
+          <br />
+          <p>AA</p>
+          <br />
+          <p>AA</p>
+          <br />
+          <p>AA</p>
+        </div>
+      </template>
     </BottomSheet>
   </div>
 </template>
@@ -27,13 +47,16 @@ import BottomSheet from "@/components/bottom-sheet/BottomSheet.vue";
   },
 })
 export default class BottomSheetScreen extends Vue {
-  snapPoints = [0, 200, 400, 600, window.innerHeight + 500];
+  snapPoints = [0, "auto", 200, 400, 600, window.innerHeight + 500];
   $refs: {
     bottomSheet: BottomSheet;
+    elem: HTMLDivElement;
   };
 
+  contentExpanded = false;
+
   openBottomSheet() {
-    this.$refs.bottomSheet.open();
+    this.$refs.bottomSheet.snapTo(200);
   }
 
   closeBottomSheet() {

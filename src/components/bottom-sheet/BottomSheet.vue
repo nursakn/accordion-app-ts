@@ -1,25 +1,39 @@
+<!-- eslint-disable @typescript-eslint/ban-ts-comment -->
 <template>
-  <div
-    ref="container"
-    class="bottom-sheet__container"
-    :class="{
-      'bottom-sheet__container--full': isFullScreen,
-      'bottom-sheet__container--animating': isAnimating,
-    }"
-    :style="{
-      height: height + 'px',
-      transition: isAnimating ? `height ${animationTime}ms ease-in-out` : '',
-    }"
-  >
+  <div v-show="isOpen" class="bottom-sheet" @click="dismiss">
     <div
-      class="bottom-sheet__notch"
-      @mousedown="onMouseDown"
-      @touchmove="onTouchMove"
-      @touchend="onTouchEnd"
+      id="container"
+      ref="container"
+      class="bottom-sheet__container"
+      :class="{
+        'bottom-sheet__container--full': isFullScreen,
+      }"
+      :style="{
+        height: height + 'px',
+        transition: isAnimating
+          ? `height ${animationTime}ms ease-in-out, border-top-right-radius ${animationTime}ms, border-top-left-radius ${animationTime}ms`
+          : '',
+      }"
     >
-      <p>-</p>
+      <div
+        ref="notch"
+        class="bottom-sheet__notch"
+        @mousedown="onMouseDown"
+        @touchmove="onTouchMove"
+        @touchend="onTouchEnd"
+      >
+        <p>-</p>
+      </div>
+      <div ref="header" class="bottom-sheet__header">
+        <slot name="header" />
+      </div>
+      <div ref="content" class="bottom-sheet__content">
+        <slot />
+      </div>
+      <div ref="footer" class="bottom-sheet__footer">
+        <slot name="footer" />
+      </div>
     </div>
-    <slot :open="open" :dismiss="dismiss" />
   </div>
 </template>
 
@@ -30,7 +44,7 @@ import { Prop } from "vue-property-decorator";
 
 @Component
 export default class BottomSheet extends Vue {
-  @Prop({ type: Array, default: [] }) snapPoints: number[];
+  @Prop({ type: Array, default: [] }) snapPoints: ("auto" | number)[];
 
   @Prop({ type: Number, default: 0 }) defaultPoint: number;
 
@@ -41,6 +55,7 @@ export default class BottomSheet extends Vue {
   height = 0;
   isDragging = false;
   isSwipingDown = false;
+  isOpen = false;
 
   prevY: number;
 
@@ -50,15 +65,54 @@ export default class BottomSheet extends Vue {
 
   $refs!: {
     container: HTMLDivElement;
+    notch: HTMLDivElement;
+    header: HTMLDivElement;
+    content: HTMLDivElement;
+    footer: HTMLDivElement;
   };
 
+  countContentHeight() {
+    let contentHeight = this.$refs.content.firstElementChild?.clientHeight
+      ? this.$refs.content.firstElementChild?.clientHeight
+      : 0;
+
+    contentHeight += this.$refs.notch.clientHeight;
+    contentHeight += this.$refs.header.clientHeight;
+    contentHeight += this.$refs.footer.clientHeight;
+    return contentHeight;
+  }
+
+  resizeObserver: ResizeObserver;
+
   mounted() {
+    // Get root element of content and then add up their heights in order to count auto-height
+    this.resizeObserver = new ResizeObserver(() => {
+      if (this.snapPoints) {
+        const autoIndex = this.snapPoints.findIndex(
+          (value) => value === "auto"
+        );
+        console.log("OBSERVER RUNNING");
+        this._snapPoints[autoIndex] = this.countContentHeight();
+        this.snapToPoint(autoIndex);
+      }
+    });
+
+    const contentHeight = this.countContentHeight();
+
+    if (this.$refs.content.firstElementChild) {
+      this.resizeObserver.observe(this.$refs.content.firstElementChild);
+    }
+
     this._snapPoints = this.snapPoints.map((point) => {
+      if (point === "auto") {
+        return contentHeight;
+      }
       if (point > window.innerHeight) {
         return window.innerHeight;
       }
       return point;
     });
+
     if (this.defaultPoint) {
       this.snapTo(this.defaultPoint);
     }
@@ -67,14 +121,26 @@ export default class BottomSheet extends Vue {
   }
 
   snapTo(value: number) {
+    console.log("SNAP TO: ", value);
     const closest = this._snapPoints.reduce((prev, curr) => {
       return Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev;
     });
     this.height = closest;
+    if (closest > 0) {
+      this.isOpen = true;
+    }
     this.isAnimating = true;
-    setTimeout(() => {
+    return setTimeout(() => {
       this.isAnimating = false;
+      if (value === 0) {
+        this.isOpen = false;
+      }
     }, this.animationTime);
+  }
+
+  snapToPoint(number: number) {
+    console.log("SNAP TO POINT: ", number);
+    this.snapTo(this._snapPoints[number]);
   }
 
   onMouseDown() {
@@ -91,15 +157,17 @@ export default class BottomSheet extends Vue {
   }
 
   onMouseUp() {
-    this.isDragging = false;
-    this.$refs.container.style.maxHeight = "100%";
-    document.removeEventListener("mousemove", this.onMouseMove);
-    if (this.isSwipingDown) {
-      this.isSwipingDown = false;
-      this.snapTo(0);
-      return;
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.$refs.container.style.maxHeight = "100%";
+      document.removeEventListener("mousemove", this.onMouseMove);
+      if (this.isSwipingDown) {
+        this.isSwipingDown = false;
+        this.snapTo(0);
+        return;
+      }
+      this.snapTo(this.height);
     }
-    this.snapTo(this.height);
   }
 
   onTouchMove(e: TouchEvent) {
@@ -117,14 +185,6 @@ export default class BottomSheet extends Vue {
     this.snapTo(this.height);
   }
 
-  open() {
-    if (this.defaultPoint) {
-      this.snapTo(this.defaultPoint);
-      return;
-    }
-    this.snapTo(this._snapPoints[this._snapPoints.length - 1]);
-  }
-
   dismiss() {
     this.snapTo(0);
   }
@@ -136,15 +196,31 @@ export default class BottomSheet extends Vue {
 </script>
 
 <style scoped>
-.bottom-sheet__container {
-  background: green;
+.bottom-sheet {
   position: absolute;
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+
+  background-color: rgba(0, 0, 0, 0.5);
+
+  cursor: pointer;
+}
+.bottom-sheet__container {
+  display: flex;
+  flex-direction: column;
+  background: white;
+
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  transition: border-top-right-radius 250ms, border-top-left-radius 250ms;
+
+  will-change: height;
 }
 
 .bottom-sheet__container--full {
@@ -152,8 +228,19 @@ export default class BottomSheet extends Vue {
   border-top-right-radius: 0;
 }
 
-.bottom-sheet__container--animating {
-  transition: height 250ms ease-in-out;
+.bottom-sheet__content {
+  background-color: white;
+  overflow: auto;
+}
+
+.bottom-sheet__header {
+  position: sticky;
+  background-color: white;
+}
+
+.bottom-sheet__footer {
+  position: sticky;
+  bottom: 0;
 }
 
 .bottom-sheet__notch {

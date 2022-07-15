@@ -59,7 +59,7 @@ import TransitionCollapse from "../components/transitions/transition-collapse.vu
   },
 })
 export default class BottomSheetScreen extends Vue {
-  snapPoints = ["auto", 200, 400, 600, window.innerHeight + 500];
+  snapPoints = [0, "auto", 200, 400, 600, window.innerHeight + 500];
   $refs: {
     bottomSheet1: BottomSheet;
     bottomSheet2: BottomSheet;
@@ -88,7 +88,7 @@ export default class BottomSheetScreen extends Vue {
 }
 </script>
 
-<style>
+<style scoped>
 .button {
   position: relative;
   padding: 5px 10px;

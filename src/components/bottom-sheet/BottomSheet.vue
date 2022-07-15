@@ -1,42 +1,43 @@
 <!-- eslint-disable @typescript-eslint/ban-ts-comment -->
 <template>
-  <div v-show="isOpen" class="bottom-sheet" @mousedown.self="dismiss">
-    <div class="bottom-sheet__bg"></div>
-
-    <div
-      id="container"
-      ref="container"
-      class="bottom-sheet__container"
-      :class="{
-        'bottom-sheet__container--full': isFullScreen,
-      }"
-      :style="{
-        height: height + 'px',
-        transition: isAnimating
-          ? `height ${animationTime}ms ease-in-out, border-top-right-radius ${animationTime}ms, border-top-left-radius ${animationTime}ms`
-          : '',
-      }"
-    >
+  <transition name="fade">
+    <div v-show="isOpen" class="bottom-sheet" @mousedown.self="dismiss">
+      <div class="bottom-sheet__bg"></div>
       <div
-        ref="notch"
-        class="bottom-sheet__notch"
-        @mousedown.prevent="onMouseDown"
-        @touchmove.prevent="onTouchMove"
-        @touchend.prevent="onTouchEnd"
-      ></div>
-      <div ref="body" class="bottom-sheet__body">
-        <div ref="header" class="bottom-sheet__header">
-          <slot name="header" />
-        </div>
-        <div ref="content" class="bottom-sheet__content">
-          <slot />
-        </div>
-        <div ref="footer" class="bottom-sheet__footer">
-          <slot name="footer" />
+        id="container"
+        ref="container"
+        class="bottom-sheet__container"
+        :class="{
+          'bottom-sheet__container--full': isFullScreen,
+        }"
+        :style="{
+          height: height + 'px',
+          transition: isAnimating
+            ? `height ${animationTime}ms ease-in-out, border-top-right-radius ${animationTime}ms, border-top-left-radius ${animationTime}ms`
+            : '',
+        }"
+      >
+        <div
+          ref="notch"
+          class="bottom-sheet__notch"
+          @mousedown.prevent="onMouseDown"
+          @touchmove.prevent="onTouchMove"
+          @touchend.prevent="onTouchEnd"
+        ></div>
+        <div ref="body" class="bottom-sheet__body">
+          <div ref="header" class="bottom-sheet__header">
+            <slot name="header" />
+          </div>
+          <div ref="content" class="bottom-sheet__content">
+            <slot />
+          </div>
+          <div ref="footer" class="bottom-sheet__footer">
+            <slot name="footer" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script lang="ts">
@@ -83,7 +84,7 @@ export default class BottomSheet extends Vue {
     let contentHeight = 0;
 
     contentHeight += this.$refs.notch.clientHeight;
-    contentHeight += this.$refs.body.scrollHeight;
+    contentHeight += this.$refs.body.clientHeight;
     return contentHeight;
   }
 
@@ -240,6 +241,15 @@ export default class BottomSheet extends Vue {
   z-index: 10;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 .bottom-sheet__bg {
   position: absolute;
   top: 0;

@@ -3,7 +3,8 @@
     <nav>
       <router-link to="/">Home</router-link> |
       <router-link to="/crud">Crud</router-link> |
-      <router-link to="/bottom">Bottom sheet</router-link>
+      <router-link to="/bottom">Bottom sheet</router-link> |
+      <router-link to="/bottom2">Bottom sheet 2</router-link>
     </nav>
     <router-view />
     <confirm-modal :open="isConfirmOpen" />

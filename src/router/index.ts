@@ -3,6 +3,7 @@ import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import Simple from "@/views/Simple.vue";
 import BottomSheetScreen from "@/views/BottomSheetScreen.vue";
+import BottomSheetScreen2 from "@/views/BottomSheetScreen2.vue";
 
 Vue.use(VueRouter);
 
@@ -22,6 +23,11 @@ const routes: Array<RouteConfig> = [
     path: "/bottom",
     name: "bottom",
     component: BottomSheetScreen,
+  },
+  {
+    path: "/bottom2",
+    name: "bottom2",
+    component: BottomSheetScreen2,
   },
 ];
 
